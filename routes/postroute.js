@@ -10,8 +10,8 @@ router.post("/post", async (req, res) => {
     post.save().then((result) => {
 
     })
-    const pos = await POST.find().sort({ "timestamp": -1 })
-    res.json({ post: pos });
+    
+    res.json({ post: post });
 
   } catch (error) {
     res.json({ message: "post unsuccessfull" });
