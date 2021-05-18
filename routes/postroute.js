@@ -4,7 +4,6 @@ const router = express.Router();
 const POST = mongoose.model("POST");
 router.post("/post", async (req, res) => {
   const body = req.body;
-
   try {
     const post = await new POST(body);
     post.save().then((result) => {

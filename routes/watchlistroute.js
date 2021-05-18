@@ -8,12 +8,31 @@ router.post("/watch", async (req, res) => {
     try {
         watch.findOne({ userid: data.userid }).then(async (value) => {
             if (value) {
-                await watch.updateMany({ userid: data.userid }, {
-                    $push: {
-                        watchlist: data.watchlist
-                    }
+                await watch.findOne(
+                    {
+                        "userid": data.userid,
+                        "watchlist": {
+                            "$elemMatch": {
+                                "watchlistname": data.watchlist[0].watchlistname
+                            }
 
-                }).then((re) => res.json({ "message": "success" }));
+                        }
+                    }).then(async (v) => {
+                        if (v) {
+                            return res.json({ "message": "This watchlist is already there please change the name" })
+
+                        }
+                        else {
+                            await watch.updateMany({ userid: data.userid }, {
+                                $push: {
+                                    watchlist: data.watchlist
+                                }
+
+                            }).then((re) => res.json({ "message": "success" }));
+                        }
+
+                    })
+
             }
             else {
                 const watchlist = await new watch(data);
@@ -29,53 +48,124 @@ router.post("/watch", async (req, res) => {
 })
 router.get("/watch/:userid", async (req, res) => {
     const post = await watch.find({ userid: req.params.userid })
-    const sortByDate = arr => {
-        const sorter = (a, b) => {
-            return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-        }
-        arr.sort(sorter);
-    };
+
     res.json({ post: post });
 })
-router.put("/watch/:watchnameid", async (req, res) => {
-    const watchlist = req.body.watchlist;
-    try {
-        await watch.findByIdAndUpdate(req.params.watchnameid, {
-            $push: {
-                watchlist: watchlist
-            }
-        }).then((result) => res.json({ post: result }));
-    } catch (err) {
-        res.json({ err: err.message });
-    }
-})
-router.put("/watch/:watchnameid/:watchmovienameid", async (req, res) => {
 
-    const watchlist = req.body.watchlistdata;
-    try {
-        await watch.updateMany(
-            {
-                "_id": req.params.watchnameid,
-                "watchlist": {
+router.put("/watch/:userid/:watchmovienameid/:id", async (req, res) => {
+
+    const watchlist = req.body.watchlistdata
+    await watch.findOne({
+        "userid": req.params.userid,
+        "watchlist": {
+            "$elemMatch": {
+                "_id": req.params.watchmovienameid,
+                "watchlistdata": {
                     "$elemMatch": {
-                        "_id": req.params.watchmovienameid,
+                        "id": req.params.id
+
                     }
 
                 }
-            }, {
-            $push: {
-                "watchlist.$[outer].watchlistdata": watchlist
-            },
-        },
-            { arrayFilters: [{ "outer._id": req.params.watchmovienameid }], multi: true }
 
-        ).then((r) => {
-            res.json({ message: "success" });
-        });
+            }
+
+        }
+    }).then(async (value) => {
+        if (value) {
+            try {
+
+                await watch.updateMany(
+                    {
+                        "userid": req.params.userid,
+                        "watchlist": {
+                            "$elemMatch": {
+                                "_id": req.params.watchmovienameid,
+                                "watchlistdata": {
+                                    "$elemMatch": {
+                                        "id": req.params.id
+
+                                    }
 
 
-    } catch (err) {
-        res.json({ err: err.message });
-    }
+                                }
+
+                            }
+
+                        }
+                    },
+                    {
+                        $set: {
+                            "watchlist.$[outer].watchlistdata.$[inner].id": watchlist[0].id,
+                            "watchlist.$[outer].watchlistdata.$[inner].moviename": watchlist[0].moviename,
+                            "watchlist.$[outer].watchlistdata.$[inner].poster_path": watchlist[0].poster_path,
+                        },
+
+                    },
+
+                    {
+
+                        arrayFilters: [{ "outer._id": req.params.watchmovienameid },
+                        { "inner.id": req.params.id }
+
+                        ], multi: true
+                    },
+
+
+
+                ).then((r) => {
+                    res.json({ message: "success" });
+                });
+
+
+            } catch (err) {
+                res.json({ err: err.message });
+            }
+
+        }
+        else {
+            try {
+
+                await watch.updateMany(
+                    {
+                        "userid": req.params.userid,
+                        "watchlist": {
+                            "$elemMatch": {
+                                "_id": req.params.watchmovienameid,
+
+                            }
+
+                        }
+                    },
+                    {
+                        $push: {
+                            "watchlist.$[outer].watchlistdata": watchlist,
+
+                        },
+
+                    },
+
+                    {
+
+                        arrayFilters: [{ "outer._id": req.params.watchmovienameid },
+                        { "inner.id": req.params.id }
+
+                        ], multi: true
+                    },
+
+
+
+                ).then((r) => {
+                    res.json({ message: "success" });
+                });
+
+
+            } catch (err) {
+                res.json({ err: err.message });
+            }
+        }
+
+    })
+
 })
 module.exports = router;

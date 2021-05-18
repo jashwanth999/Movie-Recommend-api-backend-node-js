@@ -8,7 +8,8 @@ const watchlist = mongoose.Schema({
             timestamp: String,
             watchlistdata: [
                 {
-                    movieid: String,
+
+                    id: String,
                     moviename: String,
                     poster_path: String
                 }
