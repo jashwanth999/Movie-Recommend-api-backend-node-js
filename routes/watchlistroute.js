@@ -19,7 +19,7 @@ router.post("/watch", async (req, res) => {
                         }
                     }).then(async (v) => {
                         if (v) {
-                            return res.json({ "message": "This watchlist is already there please change the name" })
+                            return res.json({ "post": "This watchlist is already there please change the name" })
 
                         }
                         else {
@@ -28,7 +28,7 @@ router.post("/watch", async (req, res) => {
                                     watchlist: data.watchlist
                                 }
 
-                            }).then((re) => res.json({ "message": "success" }));
+                            }).then((re) => res.json({ "post": re }));
                         }
 
                     })
@@ -51,13 +51,36 @@ router.get("/watch/:userid", async (req, res) => {
 
     res.json({ post: post });
 })
+router.get("/watch/:userid/:watchmovienameid", async (req, res) => {
+    await watch.find(
+        {
+            "userid": req.params.userid,
+            "watchlist": {
+                "$elemMatch": {
+                    "_id": req.params.watchmovienameid,
 
+                }
+
+
+            }
+        },
+    ).then((result) => {
+        var d = [];
+        result[0].watchlist.map((i) => {
+            if (i._id == req.params.watchmovienameid) {
+                d.push(i);
+            }
+        })
+        res.json({ post: d });
+    })
+})
 router.put("/watch/:userid/:watchmovienameid/:id", async (req, res) => {
 
     const watchlist = req.body.watchlistdata
     await watch.findOne({
         "userid": req.params.userid,
         "watchlist": {
+
             "$elemMatch": {
                 "_id": req.params.watchmovienameid,
                 "watchlistdata": {
