@@ -80,6 +80,7 @@ router.post("/saved/:userid/:movieid", async (req, res) => {
 
 router.get("/saved/:userid", async (req, res) => {
     const post = await saved.findOne({ userid: req.params.userid })
+    if (post == null) return res.json({ post: [] })
     res.json({ post: post });
 
 });
