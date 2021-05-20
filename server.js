@@ -10,6 +10,8 @@ require("./models/post");
 app.use(require("./routes/postroute"));
 require("./models/watchlist");
 app.use(require("./routes/watchlistroute"));
+require("./models/saved");
+app.use(require("./routes/savedrouter"));
 mongoose
   .connect(
     "mongodb+srv://jash:jash@cluster0.l1lts.mongodb.net/todo?retryWrites=true&w=majority",

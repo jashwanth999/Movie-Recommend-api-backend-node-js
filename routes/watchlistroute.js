@@ -80,7 +80,6 @@ router.put("/watch/:userid/:watchmovienameid/:id", async (req, res) => {
     await watch.findOne({
         "userid": req.params.userid,
         "watchlist": {
-
             "$elemMatch": {
                 "_id": req.params.watchmovienameid,
                 "watchlistdata": {
