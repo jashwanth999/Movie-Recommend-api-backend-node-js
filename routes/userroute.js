@@ -25,7 +25,10 @@ router.post("/signup", async (req, res) => {
             isauth: true
           });
           user.save().then((user) => {
-            res.json({ message: "registered successfully" });
+            res.json({
+              message: "registered successfully",
+              user: user
+            });
           });
         });
       }
