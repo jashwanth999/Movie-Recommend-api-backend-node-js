@@ -21,7 +21,8 @@ router.post("/signup", async (req, res) => {
           const user = new User({
             username: username,
             email: email,
-            password: hashpassword
+            password: hashpassword,
+            isauth: true
           });
           user.save().then((user) => {
             res.json({ message: "registered successfully" });
@@ -41,7 +42,14 @@ router.post("/signin", async (req, res) => {
         .compare(password, saveduser.password)
         .then((matched) => {
           if (matched) {
+
             const { _id, email, username } = saveduser;
+            User.findOneAndUpdate({ email: email },
+              {
+                $push: {
+                  isauth: "true",
+                }
+              })
             return res.json({ message: "sigin successfully", id: _id, username: username, email: email });
           } else {
 
@@ -52,5 +60,9 @@ router.post("/signin", async (req, res) => {
     }).catch((error) => res.json({ message: "Invalid email or password" }));
   }
 });
+router.get("/signin", async (req, res) => {
+  await User.find().then((result) => res.json({ post: result }))
+
+})
 
 module.exports = router;
