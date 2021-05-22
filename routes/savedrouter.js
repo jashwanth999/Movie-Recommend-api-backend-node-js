@@ -28,7 +28,7 @@ router.post("/saved/:userid/:movieid", async (req, res) => {
                                 $set: {
                                     "savedlist.$[outer].movieid": data.savedlist[0].movieid,
                                     "savedlist.$[outer].moviename": data.savedlist[0].moviename,
-                                    "savedlist.$[outer].poster_path": data.savedlist[0].posterpath,
+                                    "savedlist.$[outer].poster_path": data.savedlist[0].poster_path,
                                 }
 
                             },
