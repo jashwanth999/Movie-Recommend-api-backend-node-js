@@ -1,6 +1,7 @@
 const e = require("express");
 const express = require("express");
 const mongoose = require("mongoose");
+
 const router = express.Router();
 const watch = mongoose.model("watchlist");
 router.post("/watch", async (req, res) => {
@@ -58,10 +59,7 @@ router.get("/watch/:userid/:watchmovienameid", async (req, res) => {
             "watchlist": {
                 "$elemMatch": {
                     "_id": req.params.watchmovienameid,
-
                 }
-
-
             }
         },
     ).then((result) => {
@@ -188,6 +186,27 @@ router.put("/watch/:userid/:watchmovienameid/:id", async (req, res) => {
         }
 
     })
+
+})
+router.delete("/delete/:userid/:watchlistnameid", async (req, res) => {
+    try {
+        await watch.updateMany({
+            userid: req.params.userid
+        },
+            {
+                $pull: {
+                    watchlist: {
+                        _id: req.params.watchlistnameid
+                    }
+                }
+
+            }).then(() => res.json({ message: "success" }))
+    }
+    catch (err) {
+        res.json({ message: err.message })
+    }
+
+
 
 })
 module.exports = router;
